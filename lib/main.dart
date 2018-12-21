@@ -2,6 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:vibrate/vibrate.dart';
 import 'dart:async';
 
+import 'package:flutter_launcher_icons/android.dart';
+import 'package:flutter_launcher_icons/constants.dart';
+import 'package:flutter_launcher_icons/custom_exceptions.dart';
+import 'package:flutter_launcher_icons/ios.dart';
+import 'package:flutter_launcher_icons/main.dart';
+import 'package:flutter_launcher_icons/xml_templates.dart';
+
 void main() => runApp(SoccerApp ());
 
 var userInputs = [];
@@ -13,178 +20,10 @@ var playerAmount = int.parse(userInputs[0]);
 var totalTime = int.parse(userInputs[1]);
 var playersInAmount = int.parse(userInputs[2]);
 var substitutionFrequency = int.parse(userInputs[3]);
-
-void calculateResults() {
-  playerCharts = [];
-  playerAmount = int.parse(userInputs[0]);
-  totalTime = int.parse(userInputs[1]);
-  playersInAmount = int.parse(userInputs[2]);
-  substitutionFrequency = int.parse(userInputs[3]);
-
-  var playersPerSubstitution = playerAmount - playersInAmount;
-  var substitutionTotal = totalTime / substitutionFrequency;
-  var index = 0;
-  var cycleCount = 0;
-  var lastPlayer = 0;
-
-  print(playersInAmount);
-  print(substitutionTotal);
-
-  for (var i = 0; i < substitutionTotal; i++) {
-    var playingArray = [];
-    if (index > playerAmount - playersPerSubstitution) {
-      print("if");
-      index = cycleCount;
-      var starts = playerAmount - lastPlayer;
-      print(starts);
-      for (var q = 0; q < starts; q++) {
-        print("first");
-        if (q < playersInAmount) {
-          playingArray.add(playerNames[lastPlayer + q]);
-        }
-      }
-      print(playingArray.length);
-      var enders = playersInAmount - playingArray.length;
-      for (var v = 0; v < enders; v++) {
-        print("here");
-        print(v);
-        playingArray.add(playerNames[v]);
-      }
-    }
-    else {
-      print(index);
-      print("else");
-      print(lastPlayer);
-
-      if (lastPlayer > 0 && lastPlayer < playerAmount - playersInAmount) {
-        print("DID");
-        for (var q = 0; q < playersInAmount; q++) {
-          playingArray.add(playerNames[lastPlayer + q]);
-        }
-//          playingArray.add(playerNames.sublist(lastPlayer, lastPlayer + 3));
-      } else if (lastPlayer > playerAmount - playersInAmount) {
-        print("OIII");
-        for (var q = 0; q < playerAmount - lastPlayer; q++) {
-          playingArray.add(playerNames[lastPlayer + q]);
-        }
-        var enders = playersInAmount - playingArray.length;
-        for (var v = 0; v < enders; v++) {
-          print("here");
-          print(v);
-          playingArray.add(playerNames[v]);
-        }
-//          playingArray.add(playerNames.sublist(lastPlayer, playerAmount));
-      } else {
-        print("OH");
-        for (var q = 0; q < playersInAmount; q++) {
-          playingArray.add(playerNames[lastPlayer + q]);
-        }
-//          playingArray.add(playerNames.sublist(lastPlayer, lastPlayer + 3));
-      }
-
-    }
-
-    var playersIn = [];
-
-    for (var p = 0; p < playersPerSubstitution; p++) {
-      playersIn.add(playingArray[playingArray.length - 1 - p]);
-    }
-
-    var output = <Widget>[];
-
-    output.add(new Container(
-        width: 300.0,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.black, width: 1.5), top: BorderSide(color: Colors.black, width: 1.5))),
-        padding: EdgeInsets.only(left: 0.0, top: 8.0, right: 0.0, bottom: 2.0),
-        child: new Text(
-            'Time: ${i * substitutionFrequency}:00',
-            style: TextStyle(color: Colors.white)
-        )
-    ));
-
-    if (i > 0) {
-      output.add(
-          new Container(
-              width: 300.0,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.black, width: 1.5))),
-              padding: EdgeInsets.only(left: 35.0, top: 6.0, right: 35.0, bottom: 3.5),
-              child:
-              Center(
-                  child: new Text(
-                    '${playersIn.toString().replaceAll('[', '').replaceAll(']', '').replaceAll(',', ' and')} in for ${playersOut.toString().replaceAll('[', '').replaceAll(']', '').replaceAll(',', ' and')}',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white),
-                  )
-              )
-          )
-      );
-    }
-
-    for (var play in playingArray) {
-      output.add(new Container(
-          width: 300.0,
-          alignment: Alignment.center,
-          padding: EdgeInsets.only(left: 35.0, top: 8.0, right: 35.0, bottom: 8.0),
-          child: new Text(
-            '$play',
-            style: TextStyle(color: Colors.white),
-          )
-      ));
-    }
-
-
-
-    playerCharts.add(
-        new Container(
-            decoration: BoxDecoration(border: Border.all(color: Colors.black, width: 2.0, style: BorderStyle.none)),
-            child: Center(
-                child: Card(
-                    elevation: 3.0,
-                    color: Colors.black,
-                    margin: EdgeInsets.all(10.0),
-                    child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: output
-                    )
-                )
-            )
-        )
-    );
-
-    playersOut = [];
-    print(playingArray);
-    print("last");
-    var lastName = playingArray[0 + playersPerSubstitution];
-    lastPlayer = playerNames.indexOf(lastName);
-    print(playingArray.length);
-    index = index + playersPerSubstitution;
-
-    for (var p = 0; p < playersPerSubstitution; p++) {
-      playersOut.add(playingArray[0 + p]);
-    }
-  }
-
-  playerCharts.add(
-      new Container(
-          margin: EdgeInsets.only(top: 15.0, bottom: 10.0),
-          child: Center(
-              child: new MaterialButton(
-                child: new Text(
-                    'Start Game',
-                    style: TextStyle(color: Colors.white)),
-                color: Colors.black,
-                onPressed: null,
-              )
-          )
-      )
-  );
-
-}
+var stopwatch = new Stopwatch();
 
 // main application widget
-class SoccerApp extends StatelessWidget {
+class SoccerApp extends StatelessWidget{
   @override
 
   Widget build(BuildContext context) {
@@ -194,6 +33,66 @@ class SoccerApp extends StatelessWidget {
         routes: <String, WidgetBuilder> {
 //        '/playerNames': (BuildContext context) => MyPage(title: 'Player Names')
         }
+    );
+  }
+}
+
+class Countdown extends AnimatedWidget {
+  Countdown({ Key key, this.animation }) : super(key: key, listenable: animation);
+  Animation<int> animation;
+
+  @override
+  build(BuildContext context){
+    return new Text(
+      animation.value.toString(),
+      style: new TextStyle(fontSize: 150.0),
+    );
+  }
+}
+
+class StartGame extends StatefulWidget {
+  @override
+  StartGameState createState() => new StartGameState();
+}
+
+class StartGameState extends State<StartGame> with TickerProviderStateMixin {
+  @override
+  AnimationController _controller;
+
+  var _totalTime = int.parse(userInputs[1]) * 60;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = new AnimationController(
+      vsync: this,
+      duration: new Duration(seconds: _totalTime),
+    );
+  }
+
+  Widget build(BuildContext context) {
+    return new Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        title: Text("Game Time")
+      ),
+      floatingActionButton: new FloatingActionButton(
+        child: new Icon(Icons.play_arrow),
+        onPressed: () {
+          _controller.forward(from: _totalTime.toDouble());
+        },
+      ),
+      body: new Container(
+        margin: EdgeInsets.only(top: 20.0),
+        child: new Center(
+          child: new Countdown(
+            animation: new StepTween(
+              begin: _totalTime,
+              end: 0
+            ).animate(_controller),
+          )
+        ),
+      )
     );
   }
 }
@@ -241,6 +140,185 @@ class PlayerNamesState extends State<PlayerNames> {
     playerNames = [];
     _formKey.currentState.save();
     print(playerNames);
+  }
+
+  void startNow() {
+    print('starting');
+    Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => StartGame())
+    );
+  }
+
+  void calculateResults() {
+    playerCharts = [];
+    playerAmount = int.parse(userInputs[0]);
+    totalTime = int.parse(userInputs[1]);
+    playersInAmount = int.parse(userInputs[2]);
+    substitutionFrequency = int.parse(userInputs[3]);
+
+    var playersPerSubstitution = playerAmount - playersInAmount;
+    var substitutionTotal = totalTime / substitutionFrequency;
+    var index = 0;
+    var cycleCount = 0;
+    var lastPlayer = 0;
+
+    print(playersInAmount);
+    print(substitutionTotal);
+
+    for (var i = 0; i < substitutionTotal; i++) {
+      var playingArray = [];
+      if (index > playerAmount - playersPerSubstitution) {
+        print("if");
+        index = cycleCount;
+        var starts = playerAmount - lastPlayer;
+        print(starts);
+        for (var q = 0; q < starts; q++) {
+          print("first");
+          if (q < playersInAmount) {
+            playingArray.add(playerNames[lastPlayer + q]);
+          }
+        }
+        print(playingArray.length);
+        var enders = playersInAmount - playingArray.length;
+        for (var v = 0; v < enders; v++) {
+          print("here");
+          print(v);
+          playingArray.add(playerNames[v]);
+        }
+      }
+      else {
+        print(index);
+        print("else");
+        print(lastPlayer);
+
+        if (lastPlayer > 0 && lastPlayer < playerAmount - playersInAmount) {
+          print("DID");
+          for (var q = 0; q < playersInAmount; q++) {
+            playingArray.add(playerNames[lastPlayer + q]);
+          }
+//          playingArray.add(playerNames.sublist(lastPlayer, lastPlayer + 3));
+        } else if (lastPlayer > playerAmount - playersInAmount) {
+          print("OIII");
+          for (var q = 0; q < playerAmount - lastPlayer; q++) {
+            playingArray.add(playerNames[lastPlayer + q]);
+          }
+          var enders = playersInAmount - playingArray.length;
+          for (var v = 0; v < enders; v++) {
+            print("here");
+            print(v);
+            playingArray.add(playerNames[v]);
+          }
+//          playingArray.add(playerNames.sublist(lastPlayer, playerAmount));
+        } else {
+          print("OH");
+          for (var q = 0; q < playersInAmount; q++) {
+            playingArray.add(playerNames[lastPlayer + q]);
+          }
+//          playingArray.add(playerNames.sublist(lastPlayer, lastPlayer + 3));
+        }
+
+      }
+
+      var playersIn = [];
+
+      for (var p = 0; p < playersPerSubstitution; p++) {
+        playersIn.add(playingArray[playingArray.length - 1 - p]);
+      }
+
+      var output = <Widget>[];
+
+      output.add(new Container(
+          width: 300.0,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.black, width: 1.5), top: BorderSide(color: Colors.black, width: 1.5))),
+          padding: EdgeInsets.only(left: 0.0, top: 8.0, right: 0.0, bottom: 2.0),
+          child: new Text(
+              'Time: ${i * substitutionFrequency}:00',
+              style: TextStyle(color: Colors.white)
+          )
+      ));
+
+      if (i > 0) {
+        output.add(
+            new Container(
+                width: 300.0,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.black, width: 1.5))),
+                padding: EdgeInsets.only(left: 35.0, top: 6.0, right: 35.0, bottom: 3.5),
+                child:
+                Center(
+                    child: new Text(
+                      '${playersIn.toString().replaceAll('[', '').replaceAll(']', '').replaceAll(',', ' and')} in for ${playersOut.toString().replaceAll('[', '').replaceAll(']', '').replaceAll(',', ' and')}',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.white),
+                    )
+                )
+            )
+        );
+      }
+
+      for (var play in playingArray) {
+        output.add(new Container(
+            width: 300.0,
+            alignment: Alignment.center,
+            padding: EdgeInsets.only(left: 35.0, top: 8.0, right: 35.0, bottom: 8.0),
+            child: new Text(
+              '$play',
+              style: TextStyle(color: Colors.white),
+            )
+        ));
+      }
+
+
+
+      playerCharts.add(
+          new Container(
+              decoration: BoxDecoration(border: Border.all(color: Colors.black, width: 2.0, style: BorderStyle.none)),
+              child: Center(
+                  child: Card(
+                      elevation: 3.0,
+                      color: Colors.black,
+                      margin: EdgeInsets.all(10.0),
+                      child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: output
+                      )
+                  )
+              )
+          )
+      );
+
+      playersOut = [];
+      print(playingArray);
+      print("last");
+      var lastName = playingArray[0 + playersPerSubstitution];
+      lastPlayer = playerNames.indexOf(lastName);
+      print(playingArray.length);
+      index = index + playersPerSubstitution;
+
+      for (var p = 0; p < playersPerSubstitution; p++) {
+        playersOut.add(playingArray[0 + p]);
+      }
+    }
+
+    playerCharts.add(
+        new Container(
+            margin: EdgeInsets.only(top: 15.0, bottom: 10.0),
+            child: Center(
+                child: new MaterialButton(
+                  child: new Text(
+                      'Start Game',
+                      style: TextStyle(color: Colors.white)),
+                  color: Colors.black,
+                  onPressed: () {
+                    startNow();
+                  },
+                )
+            )
+        )
+    );
+
   }
 
   Widget build(BuildContext context) {
