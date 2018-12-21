@@ -14,6 +14,7 @@ void main() => runApp(SoccerApp ());
 var userInputs = [];
 var playerNames = [];
 var playersOut = [];
+var inAndOut = [];
 
 var playerCharts = new List<Widget>();
 var playerAmount = int.parse(userInputs[0]);
@@ -40,12 +41,47 @@ class SoccerApp extends StatelessWidget{
 class Countdown extends AnimatedWidget {
   Countdown({ Key key, this.animation }) : super(key: key, listenable: animation);
   Animation<int> animation;
-
+  var secondCounter = 59.toString();
+  var position = 0;
+  var notify = '';
   @override
   build(BuildContext context){
-    return new Text(
-      animation.value.toString(),
-      style: new TextStyle(fontSize: 150.0),
+    var secondCounterInt = int.parse(secondCounter);
+    var timeDisplay = '';
+    var minute = (animation.value / 60).toInt();
+    if (animation.value % 60 == 0 && minute == 18) {
+      print(position);
+      notify = inAndOut[position];
+      position += 1;
+    } else if (minute > totalTime - substitutionFrequency) {
+      notify = '';
+    } else {
+      notify = inAndOut[position];
+    }
+    if (animation.value % 60 == 0) {
+      timeDisplay = '${minute}:00';
+    }
+    else {
+      if (secondCounterInt < 10 && secondCounterInt > 0) {
+        secondCounter = '0${(animation.value.toInt() % 60)}';
+      } else {
+        secondCounter = (animation.value.toInt() % 60).toString();
+      }
+      timeDisplay = '${(animation.value / 60).toInt()}:$secondCounter';
+    }
+
+    return new Text.rich(
+      TextSpan(
+        children: <TextSpan>[
+          new TextSpan(
+            text: timeDisplay + '\n',
+            style: new TextStyle(fontSize: 125.0),
+          ),
+          new TextSpan(
+            text: notify,
+          )
+        ],
+      )
     );
   }
 }
@@ -66,6 +102,7 @@ class StartGameState extends State<StartGame> with TickerProviderStateMixin {
     super.initState();
     _controller = new AnimationController(
       vsync: this,
+      value: _totalTime.toDouble(),
       duration: new Duration(seconds: _totalTime),
     );
   }
@@ -77,18 +114,20 @@ class StartGameState extends State<StartGame> with TickerProviderStateMixin {
         title: Text("Game Time")
       ),
       floatingActionButton: new FloatingActionButton(
+        backgroundColor: Colors.black,
         child: new Icon(Icons.play_arrow),
         onPressed: () {
-          _controller.forward(from: _totalTime.toDouble());
+          _controller.reverse(from: _totalTime.toDouble());
         },
       ),
-      body: new Container(
-        margin: EdgeInsets.only(top: 20.0),
-        child: new Center(
+      body: new Center(
+        child: new Container(
+        alignment: Alignment.center,
+//          margin: EdgeInsets.only(top: 20.0, left: 25.0),
           child: new Countdown(
             animation: new StepTween(
-              begin: _totalTime,
-              end: 0
+              begin: 0,
+              end: _totalTime
             ).animate(_controller),
           )
         ),
@@ -135,6 +174,7 @@ class PlayerNames extends StatefulWidget {
 class PlayerNamesState extends State<PlayerNames> {
   @override
   final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
+  var localInAndOut = [];
 
   void submit() {
     playerNames = [];
@@ -143,6 +183,7 @@ class PlayerNamesState extends State<PlayerNames> {
   }
 
   void startNow() {
+    print(inAndOut);
     print('starting');
     Navigator.push(
         context,
@@ -240,6 +281,7 @@ class PlayerNamesState extends State<PlayerNames> {
       ));
 
       if (i > 0) {
+        localInAndOut.add('${playersIn.toString().replaceAll('[', '').replaceAll(']', '').replaceAll(',', ' and')} in for ${playersOut.toString().replaceAll('[', '').replaceAll(']', '').replaceAll(',', ' and')}');
         output.add(
             new Container(
                 width: 300.0,
@@ -332,6 +374,8 @@ class PlayerNamesState extends State<PlayerNames> {
           decoration: new InputDecoration(
             counterText: '',
             labelText: "Player ${i+1}",
+            focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black, width: 1.5)),
+            labelStyle: TextStyle(color: Colors.black)
           ),
           onSaved: (String value) {
             playerNames.add(value);
@@ -358,7 +402,7 @@ class PlayerNamesState extends State<PlayerNames> {
         )
     )
     );
-
+    inAndOut = localInAndOut;
     return Scaffold(
       appBar: AppBar(
         title: Text("Player Names"),
@@ -421,8 +465,10 @@ class InputFieldsState extends State<InputFields> {
         maxLines: 1,
         keyboardType: TextInputType.number,
         decoration: new InputDecoration(
+          focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black, width: 1.5)),
+          labelStyle: TextStyle(color: Colors.black),
           counterText: '',
-          labelText: title,
+          labelText: title
         ),
         onSaved: (String value) {
           userInputs.add(value);
@@ -441,12 +487,7 @@ class InputFieldsState extends State<InputFields> {
               style: TextStyle(color: Colors.white)),
           color: Colors.black,
           onPressed: () {
-//            myController.dispose();
             this.submit();
-//            Navigator.push(
-//              context,
-//              MaterialPageRoute(builder: (context) => PlayerNames())
-//            );
           },
         )
     )
