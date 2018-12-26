@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:vibrate/vibrate.dart';
-import 'dart:async';
+//import 'dart:async';
 
-import 'package:flutter_launcher_icons/android.dart';
-import 'package:flutter_launcher_icons/constants.dart';
-import 'package:flutter_launcher_icons/custom_exceptions.dart';
-import 'package:flutter_launcher_icons/ios.dart';
-import 'package:flutter_launcher_icons/main.dart';
-import 'package:flutter_launcher_icons/xml_templates.dart';
+//import 'package:flutter_launcher_icons/android.dart';
+//import 'package:flutter_launcher_icons/constants.dart';
+//import 'package:flutter_launcher_icons/custom_exceptions.dart';
+//import 'package:flutter_launcher_icons/ios.dart';
+//import 'package:flutter_launcher_icons/main.dart';
+//import 'package:flutter_launcher_icons/xml_templates.dart';
 
 void main() => runApp(SoccerApp ());
 
@@ -15,6 +15,8 @@ var userInputs = [];
 var playerNames = [];
 var playersOut = [];
 var inAndOut = [];
+var togglePlay = true;
+IconData iconDisplay  = Icons.play_arrow;
 
 var playerCharts = new List<Widget>();
 var playerAmount = int.parse(userInputs[0]);
@@ -45,10 +47,13 @@ class Countdown extends AnimatedWidget {
   var position = 0;
   var notify = '';
   @override
+
   build(BuildContext context){
+    if (togglePlay == false) {
+    }
     var secondCounterInt = int.parse(secondCounter);
     var timeDisplay = '';
-    var minute = (animation.value / 60).toInt();
+    var minute = (animation.value ~/ 60);
     if (animation.value % 60 == 0 && minute == 18) {
       print(position);
       notify = inAndOut[position];
@@ -59,7 +64,7 @@ class Countdown extends AnimatedWidget {
       notify = inAndOut[position];
     }
     if (animation.value % 60 == 0) {
-      timeDisplay = '${minute}:00';
+      timeDisplay = '$minute:00';
     }
     else {
       if (secondCounterInt < 10 && secondCounterInt > 0) {
@@ -115,10 +120,14 @@ class StartGameState extends State<StartGame> with TickerProviderStateMixin {
       ),
       floatingActionButton: new FloatingActionButton(
         backgroundColor: Colors.black,
-        child: new Icon(Icons.play_arrow),
         onPressed: () {
+          togglePlay = togglePlay == true ? false : true;
+          setState(() {
+            iconDisplay = iconDisplay == Icons.play_arrow ? Icons.pause : Icons.play_arrow; // Change icon and setState to rebuild
+          });
           _controller.reverse(from: _totalTime.toDouble());
         },
+        child: new Icon(iconDisplay),
       ),
       body: new Center(
         child: new Container(
