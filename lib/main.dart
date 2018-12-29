@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:vibrate/vibrate.dart';
+//import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
+//import 'package:vibrate/vibrate.dart';
+//import 'package:firebase_messaging/firebase_messaging.dart';
+
 //import 'dart:async';
 
 //import 'package:flutter_launcher_icons/android.dart';
@@ -11,11 +15,20 @@ import 'package:vibrate/vibrate.dart';
 
 void main() => runApp(SoccerApp ());
 
+//final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+
 var userInputs = [];
 var playerNames = [];
 var playersOut = [];
 var inAndOut = [];
 var togglePlay = true;
+
+var firstPress = true;
+var animationValue = 0;
+var pauseDisplay = 0;
+var position = 0;
+var previousAnimationValue = 0;
+
 IconData iconDisplay  = Icons.play_arrow;
 
 var playerCharts = new List<Widget>();
@@ -30,6 +43,7 @@ class SoccerApp extends StatelessWidget{
   @override
 
   Widget build(BuildContext context) {
+//    _firebaseMessaging.configure();
     return MaterialApp(
         title: 'SUB OUT',
         home: InputFields(),
@@ -44,25 +58,33 @@ class Countdown extends AnimatedWidget {
   Countdown({ Key key, this.animation }) : super(key: key, listenable: animation);
   Animation<int> animation;
   var secondCounter = 59.toString();
-  var position = 0;
   var notify = '';
+  var subFrequency = int.parse(userInputs[3]);
+  var totalMinute = int.parse(userInputs[1]);
   @override
 
   build(BuildContext context){
-    if (togglePlay == false) {
-    }
+
+    animationValue = animation.value;
+
     var secondCounterInt = int.parse(secondCounter);
     var timeDisplay = '';
     var minute = (animation.value ~/ 60);
-    if (animation.value % 60 == 0 && minute == 18) {
-      print(position);
-      notify = inAndOut[position];
-      position += 1;
-    } else if (minute > totalTime - substitutionFrequency) {
-      notify = '';
-    } else {
-      notify = inAndOut[position];
+
+    if (previousAnimationValue != animation.value) {
+      if (animation.value % 60 == 0 && minute <= (totalMinute - subFrequency) && minute % subFrequency == 0 && togglePlay != true) {
+        print('notification: $notify');
+        if (position > (totalMinute / subFrequency) - 2) {
+          position = 0;
+        }
+        notify = inAndOut[position];
+        position += 1;
+      } else if (minute > (totalMinute - subFrequency)) {
+        position = 0;
+        notify = '';
+      }
     }
+
     if (animation.value % 60 == 0) {
       timeDisplay = '$minute:00';
     }
@@ -72,8 +94,21 @@ class Countdown extends AnimatedWidget {
       } else {
         secondCounter = (animation.value.toInt() % 60).toString();
       }
-      timeDisplay = '${(animation.value / 60).toInt()}:$secondCounter';
+      timeDisplay = '${(animation.value ~/ 60)}:$secondCounter';
     }
+
+    if (togglePlay == true) {
+      secondCounter = (pauseDisplay.toInt() % 60).toString();
+      timeDisplay = '${pauseDisplay ~/ 60}:${secondCounter}';
+    }
+
+    if (firstPress == true && animation.value == 0) {
+      print(animation.value);
+      var start = int.parse(userInputs[1]) * 60;
+      timeDisplay = '${start ~/ 60}:00';
+    }
+
+    previousAnimationValue = animation.value;
 
     return new Text.rich(
       TextSpan(
@@ -83,7 +118,8 @@ class Countdown extends AnimatedWidget {
             style: new TextStyle(fontSize: 125.0),
           ),
           new TextSpan(
-            text: notify,
+            text: "$notify",
+            style: new TextStyle(fontSize: 20)
           )
         ],
       )
@@ -104,6 +140,9 @@ class StartGameState extends State<StartGame> with TickerProviderStateMixin {
 
   @override
   void initState() {
+    print("hello");
+    print(_totalTime);
+    firstPress = true;
     super.initState();
     _controller = new AnimationController(
       vsync: this,
@@ -113,6 +152,7 @@ class StartGameState extends State<StartGame> with TickerProviderStateMixin {
   }
 
   Widget build(BuildContext context) {
+    print(animationValue);
     return new Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
@@ -125,7 +165,20 @@ class StartGameState extends State<StartGame> with TickerProviderStateMixin {
           setState(() {
             iconDisplay = iconDisplay == Icons.play_arrow ? Icons.pause : Icons.play_arrow; // Change icon and setState to rebuild
           });
-          _controller.reverse(from: _totalTime.toDouble());
+          if (firstPress == true) {
+            _controller.forward(from: 0);
+            firstPress = false;
+          } else {
+            if (togglePlay == true) {
+              print("togglePlay");
+              print(animationValue);
+              pauseDisplay = animationValue;
+              _controller.stop(canceled: true);
+            } else {
+              _controller.stop(canceled: false);
+              _controller.forward(from: 0);
+            }
+          }
         },
         child: new Icon(iconDisplay),
       ),
@@ -135,8 +188,8 @@ class StartGameState extends State<StartGame> with TickerProviderStateMixin {
 //          margin: EdgeInsets.only(top: 20.0, left: 25.0),
           child: new Countdown(
             animation: new StepTween(
-              begin: 0,
-              end: _totalTime
+              begin: _totalTime - animationValue,
+              end: 0
             ).animate(_controller),
           )
         ),
@@ -154,7 +207,7 @@ class SubstitutionResults extends StatefulWidget {
 // creates time based substitution widgets
 class SubstitutionResultsState extends State<SubstitutionResults> {
   @override
-  bool _canVibrate = true;
+//  bool _canVibrate = true;
 
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -192,6 +245,7 @@ class PlayerNamesState extends State<PlayerNames> {
   }
 
   void startNow() {
+    animationValue = int.parse(userInputs[1]) * 60;
     print(inAndOut);
     print('starting');
     Navigator.push(
@@ -501,6 +555,8 @@ class InputFieldsState extends State<InputFields> {
         )
     )
     );
+
+//    _firebaseMessaging.requestNotificationPermissions();
 
     return Scaffold (
         appBar: AppBar (
