@@ -260,8 +260,14 @@ class PlayerNamesState extends State<PlayerNames> {
     totalTime = int.parse(userInputs[1]);
     playersInAmount = int.parse(userInputs[2]);
     substitutionFrequency = int.parse(userInputs[3]);
+    var playersPerSubstitution = 0;
 
-    var playersPerSubstitution = playerAmount - playersInAmount;
+    if ((playerAmount - playersInAmount) >= playersInAmount) {
+      playersPerSubstitution = playersInAmount;
+    } else {
+      playersPerSubstitution = playerAmount - playersInAmount;
+    }
+
     var substitutionTotal = totalTime / substitutionFrequency;
     var index = 0;
     var cycleCount = 0;
@@ -327,6 +333,8 @@ class PlayerNamesState extends State<PlayerNames> {
       var playersIn = [];
 
       for (var p = 0; p < playersPerSubstitution; p++) {
+        print('issue here');
+        print(playersPerSubstitution);
         playersIn.add(playingArray[playingArray.length - 1 - p]);
       }
 
@@ -394,10 +402,19 @@ class PlayerNamesState extends State<PlayerNames> {
           )
       );
 
+      print(playersOut);
       playersOut = [];
       print(playingArray);
       print("last");
-      var lastName = playingArray[0 + playersPerSubstitution];
+
+      var lastName = "";
+
+      if ((playerAmount - playersInAmount) >= playersInAmount) {
+        lastName = playingArray[playingArray.length  - 1];
+      } else {
+        lastName = playingArray[0 + playersPerSubstitution];
+      }
+
       lastPlayer = playerNames.indexOf(lastName);
       print(playingArray.length);
       index = index + playersPerSubstitution;
